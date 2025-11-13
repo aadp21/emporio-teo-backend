@@ -1,0 +1,65 @@
+PostgreSQL
+contraseña del usuario= postgres
+contraseña del usuario PC  olitel= Teo2025!
+
+
+app/
+  main.py              # Punto de entrada FastAPI
+  core/config.py       # Configuración y lectura de .env
+  db/                  # Engine y Session
+  models/              # Tablas SQLAlchemy (inventario, ventas, gastos, detalle_venta)
+  schemas/             # Pydantic (entrada/salida)
+  repositories/        # Capa de acceso a datos (con clase base)
+  services/            # Lógica de negocio
+  api/v1/              # Rutas/endpoints
+migrations/            # Alembic
+requirements.txt
+README.md
+
+
+emporio-teo-backend/
+├── app/
+│   ├── api/                # Rutas/endpoints (FastAPI routers)
+│   │   └── v1/
+│   │       ├── inventario.py
+│   │       ├── ventas.py
+│   │       ├── gastos.py
+│   │       ├── reportes.py
+│   │       └── __init__.py
+│   ├── core/               # Configuración, constantes, deps globales
+│   │   ├── config.py
+│   │   └── __init__.py
+│   ├── db/                 # Conexión a BD
+│   │   ├── base.py         # Base de SQLAlchemy
+│   │   ├── session.py      # SessionLocal, engine
+│   │   └── __init__.py
+│   ├── models/             # Tablas BD (SQLAlchemy)
+│   │   ├── inventario.py
+│   │   ├── ventas.py
+│   │   ├── gastos.py
+│   │   ├── detalle_venta.py
+│   │   └── __init__.py
+│   ├── schemas/            # Pydantic: lo que entra/sale del API
+│   │   ├── inventario.py
+│   │   ├── ventas.py
+│   │   ├── gastos.py
+│   │   └── __init__.py
+│   ├── repositories/       # Capa de datos
+│   │   ├── base.py         # 👈 aquí metemos herencia
+│   │   ├── inventario_repo.py
+│   │   ├── ventas_repo.py
+│   │   ├── gastos_repo.py
+│   │   └── __init__.py
+│   ├── services/           # Lógica de negocio
+│   │   ├── base.py         # 👈 aquí también herencia
+│   │   ├── inventario_service.py
+│   │   ├── ventas_service.py
+│   │   ├── gastos_service.py
+│   │   └── __init__.py
+│   ├── web/                # opcional: templates si quieres HTML
+│   └── main.py             # crea la app FastAPI
+├── migrations/             # Alembic (Render lo puede correr)
+├── tests/
+├── .env.example
+├── requirements.txt
+└── README.md
