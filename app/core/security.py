@@ -7,18 +7,18 @@ from jose import jwt
 
 from app.core.config import settings
 
+
 # Usamos bcrypt como algoritmo de hash
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifica si el password plano coincide con el hash almacenado."""
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    """Devuelve el hash seguro del password."""
-    return pwd_context.hash(password)
+    # bcrypt sólo soporta hasta 72 bytes -> truncamos por seguridad
+    return pwd_context.hash(password[:72])
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

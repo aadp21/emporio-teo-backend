@@ -16,6 +16,7 @@ jinja2==3.1.4
 # Seguridad (JWT + hashing de passwords)
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+bcrypt==4.1.2
 
 # Excel (solo si usas migración desde Excel en producción)
 pandas==2.2.3
