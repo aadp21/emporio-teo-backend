@@ -1,0 +1,177 @@
+<!-- app/templates/reportes.html -->
+{% extends "base.html" %}
+
+{% block title %}Reportes - Emporio Teo{% endblock %}
+
+{% block content %}
+  <h1 class="mb-2">Reporte diario / por rango</h1>
+
+  {% if rango_label %}
+    <p class="text-muted mb-4">Mostrando: {{ rango_label }}</p>
+  {% endif %}
+
+  <!-- Filtro de fecha y rango -->
+  <form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+      <label for="fecha" class="col-form-label">Fecha:</label>
+    </div>
+    <div class="col-auto">
+      <input
+        type="date"
+        id="fecha"
+        name="fecha"
+        class="form-control"
+        value="{{ fecha.isoformat() if fecha is not none else '' }}"
+      />
+      <div class="form-text">
+        La fecha se usa principalmente cuando seleccionas "Fecha específica".
+      </div>
+    </div>
+
+    <div class="col-auto">
+      <label for="rango" class="col-form-label">Rango:</label>
+    </div>
+    <div class="col-auto">
+      <select id="rango" name="rango" class="form-select">
+        <option value="dia" {% if rango == 'dia' %}selected{% endif %}>Fecha específica</option>
+        <option value="hoy" {% if rango == 'hoy' %}selected{% endif %}>Hoy</option>
+        <option value="ayer" {% if rango == 'ayer' %}selected{% endif %}>Ayer</option>
+        <option value="ultimos_7" {% if rango == 'ultimos_7' %}selected{% endif %}>Últimos 7 días</option>
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">
+        Actualizar
+      </button>
+    </div>
+  </form>
+
+  <!-- Tarjetas resumen -->
+  <div class="row mb-4">
+    <div class="col-md-4 mb-3">
+      <div class="card border-success">
+        <div class="card-body">
+          <h5 class="card-title">Total Ventas</h5>
+          <p class="card-text fs-4 text-success">
+            {{ "{:,.0f}".format(total_ventas)|replace(",", ".") }} CLP
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <div class="card border-danger">
+        <div class="card-body">
+          <h5 class="card-title">Total Gastos</h5>
+          <p class="card-text fs-4 text-danger">
+            {{ "{:,.0f}".format(total_gastos)|replace(",", ".") }} CLP
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <div class="card border-primary">
+        <div class="card-body">
+          <h5 class="card-title">Utilidad</h5>
+          <p class="card-text fs-4 {% if utilidad >= 0 %}text-primary{% else %}text-danger{% endif %}">
+            {{ "{:,.0f}".format(utilidad)|replace(",", ".") }} CLP
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Totales por tipo de pago -->
+  <h2 class="h5 mt-4">Ventas por tipo de pago</h2>
+  {% if totales_por_pago %}
+    <table class="table table-sm table-bordered w-auto">
+      <thead class="table-light">
+        <tr>
+          <th>Tipo de pago</th>
+          <th class="text-end">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tipo, monto in totales_por_pago.items() %}
+          <tr>
+            <td>{{ tipo }}</td>
+            <td class="text-end">
+              {{ "{:,.0f}".format(monto)|replace(",", ".") }} CLP
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted">No hay ventas registradas para este rango.</p>
+  {% endif %}
+
+  <hr class="my-4">
+
+  <!-- Detalle de ventas y gastos -->
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <h2 class="h5">Detalle de ventas</h2>
+      {% if ventas %}
+        <table class="table table-sm table-striped">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Tipo pago</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in ventas %}
+              <tr>
+                <td>{{ v.fecha }}</td>
+                <td>
+                  {% if v.hora %}
+                    {{ v.hora.strftime("%H:%M:%S") }}
+                  {% endif %}
+                </td>
+                <td>{{ v.tipo_pago }}</td>
+                <td class="text-end">
+                  {{ "{:,.0f}".format(v.total)|replace(",", ".") }} CLP
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="text-muted">No hay ventas en el rango seleccionado.</p>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <h2 class="h5">Detalle de gastos</h2>
+      {% if gastos %}
+        <table class="table table-sm table-striped">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Comercio</th>
+              <th class="text-end">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for g in gastos %}
+              <tr>
+                <td>{{ g.fecha }}</td>
+                <td>{{ g.comercio }}</td>
+                <td class="text-end">
+                  {{ "{:,.0f}".format(g.monto)|replace(",", ".") }} CLP
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="text-muted">No hay gastos en el rango seleccionado.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

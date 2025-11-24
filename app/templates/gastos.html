@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Gastos - Emporio Teo{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Gastos</h1>
+
+  <!-- Filtro por fecha -->
+  <form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+      <label for="fecha" class="col-form-label">Fecha:</label>
+    </div>
+    <div class="col-auto">
+      <input
+        type="date"
+        id="fecha"
+        name="fecha"
+        class="form-control"
+        value="{{ fecha.isoformat() if fecha is not none else '' }}"
+      />
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">
+        Filtrar
+      </button>
+    </div>
+    {% if fecha %}
+      <div class="col-auto">
+        <a href="/panel/gastos" class="btn btn-outline-secondary">
+          Limpiar filtro
+        </a>
+      </div>
+    {% endif %}
+  </form>
+
+  {% if gastos|length == 0 %}
+    <div class="alert alert-info">
+      No hay gastos registrados
+      {% if fecha %} para la fecha {{ fecha.isoformat() }}{% endif %}.
+    </div>
+  {% else %}
+
+    {# cálculo del total mostrado #}
+    {% set total_gastos = 0 %}
+    {% for g in gastos %}
+      {% if g.monto is defined and g.monto is not none %}
+        {% set total_gastos = total_gastos + g.monto %}
+      {% endif %}
+    {% endfor %}
+
+    <div class="mb-3">
+      <strong>Total de gastos mostrados:</strong>
+      {{ "{:,.0f}".format(total_gastos)|replace(",", ".") }} CLP
+      {% if fecha %}
+        (fecha {{ fecha.isoformat() }})
+      {% endif %}
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover table-sm align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Comercio</th>
+            <th>Detalle</th>
+            <th class="text-end">Monto</th>
+            <th>Creado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for g in gastos %}
+            <tr>
+              <td>{{ g.id }}</td>
+              <td>
+                {% if g.fecha is defined and g.fecha %}
+                  {{ g.fecha.strftime("%Y-%m-%d") if g.fecha.strftime is defined else g.fecha }}
+                {% endif %}
+              </td>
+              <td>
+                {% if g.comercio is defined %}
+                  {{ g.comercio }}
+                {% endif %}
+              </td>
+              <td>
+                {% if g.detalle is defined %}
+                  {{ g.detalle }}
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if g.monto is defined and g.monto is not none %}
+                  {{ "{:,.0f}".format(g.monto)|replace(",", ".") }}
+                {% endif %}
+              </td>
+              <td>
+                {% if g.created_at is defined and g.created_at %}
+                  {{ g.created_at.strftime("%Y-%m-%d %H:%M") if g.created_at.strftime is defined else g.created_at }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

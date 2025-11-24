@@ -1,0 +1,114 @@
+<!-- app/templates/inventario_form.html -->
+{% extends "base.html" %}
+
+{% block title %}
+  {% if modo == 'editar' %}Editar producto{% else %}Nuevo producto{% endif %} - Emporio Teo
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0">
+          {% if modo == 'editar' %}Editar producto{% else %}Nuevo producto{% endif %}
+        </h1>
+        <a href="/panel/inventario" class="btn btn-outline-secondary btn-sm">
+          Volver al inventario
+        </a>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form
+            method="post"
+            action="{% if modo == 'editar' and producto %}/panel/inventario/editar/{{ producto.id }}{% else %}/panel/inventario/nuevo{% endif %}"
+          >
+            <div class="mb-3">
+              <label for="codigo" class="form-label">Código de barras</label>
+              <input
+                type="text"
+                class="form-control"
+                id="codigo"
+                name="codigo"
+                required
+                value="{{ producto.codigo if producto else '' }}"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input
+                type="text"
+                class="form-control"
+                id="nombre"
+                name="nombre"
+                required
+                value="{{ producto.nombre if producto else '' }}"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="precio" class="form-label">Precio venta (CLP)</label>
+              <input
+                type="number"
+                step="1"
+                class="form-control"
+                id="precio"
+                name="precio"
+                required
+                value="{{ producto.precio if producto else '' }}"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="precio_costo" class="form-label">Precio costo (CLP)</label>
+              <input
+                type="number"
+                step="1"
+                class="form-control"
+                id="precio_costo"
+                name="precio_costo"
+                required
+                value="{{ producto.precio_costo if producto else '' }}"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="cantidad" class="form-label">Cantidad</label>
+              <input
+                type="number"
+                step="1"
+                class="form-control"
+                id="cantidad"
+                name="cantidad"
+                required
+                value="{{ producto.cantidad if producto else 0 }}"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="stock_estado" class="form-label">Estado de stock</label>
+              <input
+                type="text"
+                class="form-control"
+                id="stock_estado"
+                name="stock_estado"
+                value="{{ producto.stock_estado if producto else '' }}"
+                placeholder="Ej: OK, Crítico, Sin stock, DESACTIVADO..."
+              />
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">
+                {% if modo == 'editar' %}Guardar cambios{% else %}Crear producto{% endif %}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

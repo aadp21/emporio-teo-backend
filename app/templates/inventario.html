@@ -1,0 +1,184 @@
+<!-- app/templates/inventario.html -->
+{% extends "base.html" %}
+
+{% block title %}Inventario - Emporio Teo{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <!-- Título + barra de búsqueda + botones -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+    <h1 class="h3 mb-3 mb-md-0">Inventario</h1>
+
+    <div class="d-flex flex-column flex-md-row gap-2">
+      <form class="d-flex gap-2" method="get" action="/panel/inventario">
+        <input
+          type="text"
+          class="form-control"
+          name="buscar"
+          placeholder="Buscar por código o nombre"
+          value="{{ buscar or '' }}"
+        />
+        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+      </form>
+
+      <div class="d-flex gap-2">
+        <button id="btn-nuevo" class="btn btn-success">
+          Nuevo producto
+        </button>
+        <button id="btn-editar" class="btn btn-warning" disabled>
+          Editar
+        </button>
+        <button id="btn-desactivar" class="btn btn-danger" disabled>
+          Desactivar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de inventario -->
+  <div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 40px;"></th>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th class="text-end">Precio venta</th>
+          <th class="text-end">Precio costo</th>
+          <th class="text-end">Cantidad</th>
+          <th>Estado stock</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr class="fila-producto" data-id="{{ item.id }}">
+          <td>
+            <input
+              type="radio"
+              name="producto_seleccionado"
+              value="{{ item.id }}"
+            />
+          </td>
+          <td>{{ item.codigo }}</td>
+          <td>{{ item.nombre }}</td>
+          <td class="text-end">
+            {{ "{:,.0f}".format(item.precio)|replace(",", ".") }} CLP
+          </td>
+          <td class="text-end">
+            {{ "{:,.0f}".format(item.precio_costo)|replace(",", ".") }} CLP
+          </td>
+          <td class="text-end">{{ item.cantidad }}</td>
+          <td>{{ item.stock_estado or "" }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            No hay productos en el inventario.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- JS para manejar selección y botones -->
+<script>
+  (function () {
+    let selectedId = null;
+
+    const filas = document.querySelectorAll(".fila-producto");
+    const radios = document.querySelectorAll(
+      "input[name='producto_seleccionado']"
+    );
+    const btnNuevo = document.getElementById("btn-nuevo");
+    const btnEditar = document.getElementById("btn-editar");
+    const btnDesactivar = document.getElementById("btn-desactivar");
+
+    function actualizarBotones() {
+      const disabled = !selectedId;
+      btnEditar.disabled = disabled;
+      btnDesactivar.disabled = disabled;
+    }
+
+    // Al hacer clic en la fila, seleccionar el radio
+    filas.forEach((fila) => {
+      fila.addEventListener("click", function (e) {
+        // Evitar doble evento si se hace clic directamente en el radio
+        if (e.target.tagName.toLowerCase() === "input") return;
+
+        const radio = this.querySelector(
+          "input[name='producto_seleccionado']"
+        );
+        if (radio) {
+          radio.checked = true;
+          selectedId = radio.value;
+          // quitar highlight de otras filas
+          filas.forEach((f) => f.classList.remove("table-active"));
+          this.classList.add("table-active");
+          actualizarBotones();
+        }
+      });
+    });
+
+    // Cambio directo en el radio
+    radios.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        selectedId = this.value;
+        filas.forEach((f) => f.classList.remove("table-active"));
+        const fila = this.closest("tr");
+        if (fila) fila.classList.add("table-active");
+        actualizarBotones();
+      });
+    });
+
+    // Botón Nuevo producto
+    if (btnNuevo) {
+      btnNuevo.addEventListener("click", function () {
+        window.location.href = "/panel/inventario/nuevo";
+      });
+    }
+
+    // Botón Editar
+    if (btnEditar) {
+      btnEditar.addEventListener("click", function () {
+        if (!selectedId) return;
+        window.location.href = `/panel/inventario/editar/${selectedId}`;
+      });
+    }
+
+    // Botón Desactivar
+    if (btnDesactivar) {
+      btnDesactivar.addEventListener("click", function () {
+        if (!selectedId) return;
+        if (
+          !confirm(
+            "¿Seguro que deseas desactivar este producto? (Se marcará como sin stock)"
+          )
+        ) {
+          return;
+        }
+
+        fetch(`/panel/inventario/desactivar/${selectedId}`, {
+          method: "POST",
+        })
+          .then((resp) => {
+            if (resp.redirected) {
+              window.location.href = resp.url;
+            } else {
+              // Si no hay redirect, recargar por si acaso
+              window.location.reload();
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            alert("Ocurrió un error al desactivar el producto.");
+          });
+      });
+    }
+
+    actualizarBotones();
+  })();
+</script>
+{% endblock %}

@@ -1,25 +1,18 @@
 # app/db/base.py
 """
-Base declarativa y registro de modelos principales del sistema Emporio Teo.
-Este archivo es leído por Alembic para detectar las tablas que deben crearse
-en la base de datos durante las migraciones.
+Base declarativa única para todo el proyecto.
+Alembic y SQLAlchemy usan este archivo para detectar todas las tablas.
 """
 
-from sqlalchemy.orm import declarative_base
-# app/db/base.py
 from app.db.base_class import Base
 
-# Importar todos los modelos (solo para que Alembic los vea)
+# Importar todos los modelos SOLO para registro de metadata
 from app.models.inventario import Inventario  # noqa
 from app.models.ventas import Venta  # noqa
 from app.models.gastos import Gasto  # noqa
 from app.models.detalle_venta import DetalleVenta  # noqa
+from app.models.usuario import Usuario  # noqa  # 👈 aquí solo se importa, no se define
 
-# Base común para todos los modelos
-Base = declarative_base()
 
-# 👇 Importar aquí todos los modelos para que Alembic los incluya en Base.metadata
-from app.models.inventario import Inventario  # noqa
-from app.models.ventas import Venta  # noqa
-from app.models.gastos import Gasto  # noqa
-from app.models.detalle_venta import DetalleVenta  # noqa
+
+
